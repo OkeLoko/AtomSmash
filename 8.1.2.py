@@ -7,11 +7,11 @@ import random
 pygame.init()
 
 # Configuración de la pantalla
-# Resolucion de Pantalla = 1280 × 720
+# Resolucion de Pantalla = 1366 × 768
 screen_width = 1366  # Ancho de la pantalla
 screen_height = 768  # Alto de la pantalla
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Metroid 8.1.2")
+pygame.display.set_caption("Metroid 8.1.4")
 
 # Colores
 white = (255, 255, 255)
@@ -29,27 +29,6 @@ acceleration = 0.1001  # Aceleración hacia adelante
 max_speed = 12  # Velocidad máxima permitida
 mini_speed = -4   # Velocidad mínima permitida de reversa
 
-
-    # Crear superficies de teclas con colores y tamaños personalizados
-# key_up_img = pygame.Surface((50, 30))
-# key_up_img.fill(black)
-# pygame.draw.polygon(key_up_img, white, [(25, 5), (15, 25), (35, 25)])
-
-# key_down_img = pygame.Surface((50, 30))
-# key_down_img.fill(black)
-# pygame.draw.polygon(key_down_img, white, [(25, 25), (15, 5), (35, 5)])
-
-# key_left_img = pygame.Surface((30, 50))
-# key_left_img.fill(black)
-# pygame.draw.polygon(key_left_img, white, [(5, 25), (25, 15), (25, 35)])
-
-# key_right_img = pygame.Surface((30, 50))
-# key_right_img.fill(black)
-# pygame.draw.polygon(key_right_img, white, [(25, 25), (5, 15), (5, 35)])
-
-# key_space_img = pygame.Surface((70, 30))
-# key_space_img.fill(black)
-# pygame.draw.rect(key_space_img, white, (15, 5, 40, 20))
 
 # Triángulo representando la nave (punta hacia adelante)
 ship_points = [(0, 10), (-8, -10), (8, -10)]
@@ -98,11 +77,31 @@ def show_info():
     screen.blit(fps_text, (10, 10))
     screen.blit(speed_text, (120, 10))
     score_text = score_font.render(f"Score: {score}", True, green)
-    screen.blit(score_text, (280, 10))
+    screen.blit(score_text, (10, 40))
+
+    nivel_text = font.render(f"Nivel: {nivel}", True, green)
+    screen.blit(nivel_text, (280, 10))
+    
+    # Mostrar los controles en la esquina inferior derecha
+    controls_text = font.render("Controls:", True, green)
+    controls_up_text = font.render("Flecha Arriba: Acelerar", True, green)
+    controls_down_text = font.render("Flecha Abajo: Desacelerar", True, green)
+    controls_left_text = font.render("Flecha Izquierda: Voltear Izquierda ", True, green)
+    controls_right_text = font.render("Flecha Derecha: Voltear Derecha", True, green)
+    screen.blit(controls_text, (20, screen_height - 120))
+    screen.blit(controls_up_text, (20, screen_height - 90))
+    screen.blit(controls_down_text, (20, screen_height - 60))
+    screen.blit(controls_left_text, (20, screen_height - 30))
+    screen.blit(controls_right_text, (20, screen_height))
+    
+
+    # Mostrar la tecla de disparo en la esquina inferior izquierda
+    shoot_text = font.render("Space: Shoot", True, green)
+    screen.blit(shoot_text, (20, screen_height - 150))
+
     # Mostrar vidas restantes y puntaje en la pantalla
     lives_text = score_font.render(f"Lives: {rocket_lives}", True, green)
-    screen.blit(lives_text, (480, 10))
-
+    screen.blit(lives_text, (400, 10))
 
 # Vidas iniciales del cohete
 rocket_lives = 3
@@ -114,10 +113,34 @@ rocket_invulnerable_timer = 1
 
 # Bucle principal del juego
 running = True
+game_over = False  # Agregamos una variable para controlar el estado de "Game Over"
 while running:
 
-    x = random.randint(1,50)
-    y = random.randint(1,50)
+    #Declaracion de Nivel
+    nivel = 1
+    
+    #Nivel 1
+    a = 30
+
+    #Nivel 2
+    if score >= 100:
+        nivel = 2
+        a = 50
+    #Nivel 3
+    if score >= 500:
+        nivel = 3
+        a = 75
+    #Nivel 4
+    if score >= 1000:
+        nivel = 4
+        a = 100
+    #Nivel
+    if score >= 2000:
+        nivel = 5
+        a = 150
+        
+    x = random.randint(1,a)
+    y = random.randint(1,a)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -196,39 +219,32 @@ while running:
     if rocket_invulnerable_timer > 0:
         rocket_invulnerable_timer -= 1
    
-    # Mostrar "Game Over" y puntaje si se quedan sin vidas
+        # Mostrar "Game Over" y puntaje si se quedan sin vidas
     if rocket_lives <= 0:
         game_over_text = score_font.render("Game Over", True, green)
         screen.blit(game_over_text, (screen_width // 2 - 60, screen_height // 2))
         final_score_text = score_font.render(f"Final Score: {score}", True, green)
         screen.blit(final_score_text, (screen_width // 2 - 70, screen_height // 2 + 40))
-        # game_over_text = score_font.render("Rene Oke", True, green)
-        # screen.blit(game_over_text, (screen_width // 2 - 65 , screen_height // 2 + 60))
-        
+
+        restart_text = score_font.render("Presiona Espacio Para volver a Jugar :D", True, green)
+        screen.blit(restart_text,(screen_width // 2 - 200, screen_height // 2 + 80))
+
+        # Verificar si el jugador presiona la barra espaciadora para reiniciar
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            # Reiniciar el juego
+            rocket_lives = 3
+            ship_x = screen_width // 2
+            ship_y = screen_height // 2
+            ship_speed = 0
+            ship_angle = 0
+            bullets = []
+            meteorites = []
+            score = 0
+            rocket_invulnerable_timer = 0
+            game_over = False  # Reseteamos el estado de "Game Over"
+
     else:
-        
-         # Mostrar los controles en la esquina inferior derecha
-        controls_text = font.render("Controls:", True, green)
-        controls_up_text = font.render("Up: Accelerate", True, green)
-        controls_down_text = font.render("Down: Decelerate", True, green)
-        controls_left_text = font.render("Left: Turn Left", True, green)
-        controls_right_text = font.render("Right: Turn Right", True, green)
-        screen.blit(controls_text, (screen_width - 220, screen_height - 120))
-        screen.blit(controls_up_text, (screen_width - 220, screen_height - 90))
-        screen.blit(controls_down_text, (screen_width - 220, screen_height - 60))
-        screen.blit(controls_left_text, (screen_width - 220, screen_height - 30))
-        screen.blit(controls_right_text, (screen_width - 220, screen_height))
-            # Mostrar imágenes de teclas generadas en la esquina inferior derecha
-        # screen.blit(key_up_img, (screen_width - 100, screen_height - 120))
-        # screen.blit(key_down_img, (screen_width - 100, screen_height - 60))
-        # screen.blit(key_left_img, (screen_width - 130, screen_height - 90))
-        # screen.blit(key_right_img, (screen_width - 70, screen_height - 90))
-
-        # Mostrar la tecla de disparo en la esquina inferior izquierda
-        shoot_text = font.render("Space: Shoot", True, green)
-        screen.blit(shoot_text, (20, screen_height - 30))
-
-
         # Dibujar el triángulo hueco en la pantalla con la rotación
         pygame.draw.polygon(screen, green, [(y + ship_x, x + ship_y) for x, y in rotated_ship_points], 1)
 
@@ -250,7 +266,7 @@ while running:
         # Crear meteoritos aleatoriamente
         if random.random() < 0.1:
             create_meteorite()
-        
+
         # Actualizar y dibujar meteoritos
         new_meteorites = []
 
